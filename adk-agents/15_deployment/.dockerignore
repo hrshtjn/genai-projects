@@ -1,0 +1,16 @@
+# Exclude the SQLite database from the container image.
+# If sessions.db is copied in, it may be read-only inside the container,
+# causing "attempt to write a readonly database" errors at runtime.
+sessions.db
+
+# Python cache — not needed in the image
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual environment
+.venv/
+
+# Local env files
+.env
