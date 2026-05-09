@@ -1,0 +1,186 @@
+# ---------------------------------------------------------------------------
+# AGENT (Python FastAPI + Google ADK)
+# ---------------------------------------------------------------------------
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: agui-agent-ksa
+  annotations:
+    iam.gke.io/gcp-service-account: agui-agent-sa@project-2db91b7b-2a47-4e55-b14.iam.gserviceaccount.com
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent
+  template:
+    metadata:
+      labels:
+        app: agent
+    spec:
+      serviceAccountName: agui-agent-ksa
+      containers:
+      - name: agent
+        image: us-central1-docker.pkg.dev/project-2db91b7b-2a47-4e55-b14/agui-repo/agent:latest # Update with your Artifact Registry URL e.g. us-central1-docker.pkg.dev/YOUR_PROJECT_ID/agui-repo/agent:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+        env:
+        - name: GOOGLE_GENAI_USE_VERTEXAI
+          value: "TRUE"
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "project-2db91b7b-2a47-4e55-b14"
+        - name: GOOGLE_CLOUD_LOCATION
+          value: "us-central1"
+        - name: PORT
+          value: "8000"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-service
+spec:
+  selector:
+    app: agent
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+
+---
+# ---------------------------------------------------------------------------
+# RUNTIME (Node Express + CopilotKit Runtime)
+# ---------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runtime-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: runtime
+  template:
+    metadata:
+      labels:
+        app: runtime
+    spec:
+      containers:
+      - name: runtime
+        image: us-central1-docker.pkg.dev/project-2db91b7b-2a47-4e55-b14/agui-repo/runtime:latest # Update with your Artifact Registry URL e.g. us-central1-docker.pkg.dev/YOUR_PROJECT_ID/agui-repo/runtime:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3001
+        env:
+        - name: AGENT_URL
+          value: "http://agent-service:8000/" # Connects to agent internally
+        - name: PORT
+          value: "3001"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+---
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: runtime-backend-config
+spec:
+  healthCheck:
+    requestPath: /health
+    port: 3001
+    type: HTTP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: runtime-service
+  annotations:
+    cloud.google.com/backend-config: '{"default": "runtime-backend-config"}'
+spec:
+  selector:
+    app: runtime
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001
+
+---
+# ---------------------------------------------------------------------------
+# FRONTEND (React + Vite + Nginx)
+# ---------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: us-central1-docker.pkg.dev/project-2db91b7b-2a47-4e55-b14/agui-repo/frontend:latest # Update with your Artifact Registry URL e.g. us-central1-docker.pkg.dev/YOUR_PROJECT_ID/agui-repo/frontend:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: ClusterIP # Ingress will route traffic to this service
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+# ---------------------------------------------------------------------------
+# INGRESS (GKE Ingress routing external traffic)
+# ---------------------------------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agui-ingress
+  annotations:
+    kubernetes.io/ingress.class: "gce" # Uses the Google Cloud external Application Load Balancer
+spec:
+  rules:
+  - http:
+      paths:
+      # /copilotkit traffic gets routed to the Node Runtime
+      - path: /copilotkit
+        pathType: Prefix
+        backend:
+          service:
+            name: runtime-service
+            port:
+              number: 3001
+      # Default traffic gets routed to the React Frontend (Nginx container)
+      - path: /*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
