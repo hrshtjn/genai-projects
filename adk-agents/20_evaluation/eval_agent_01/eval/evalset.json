@@ -1,0 +1,75 @@
+{
+  "eval_set_id": "expense_policy_eval_set",
+  "name": "Expense Policy Eval Set",
+  "description": "Checks tool usage and response quality.",
+  "eval_cases": [
+    {
+      "eval_id": "meals_within_limit",
+      "conversation": [
+        {
+          "invocation_id": "inv_1",
+          "user_content": {
+            "parts": [
+              {"text": "Can I expense a $45 meal?"}
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "DECISION: APPROVED\nCATEGORY: meals\nAMOUNT: 45.00\nLIMIT: 75.00\nREASON: within_limit"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "check_policy",
+                "args": {"category": "meals", "amount": 45}
+              }
+            ]
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "eval_agent_01",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    },
+    {
+      "eval_id": "taxi_over_limit",
+      "conversation": [
+        {
+          "invocation_id": "inv_2",
+          "user_content": {
+            "parts": [
+              {"text": "Please approve a taxi expense of $75."}
+            ]
+          },
+          "final_response": {
+            "role": "model",
+            "parts": [
+              {
+                "text": "DECISION: DENIED\nCATEGORY: taxi\nAMOUNT: 75.00\nLIMIT: 40.00\nREASON: over_limit_by_35.00"
+              }
+            ]
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "check_policy",
+                "args": {"category": "taxi", "amount": 75}
+              }
+            ]
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "eval_agent_01",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    }
+  ]
+}
