@@ -1,0 +1,155 @@
+{
+  "eval_set_id": "evalsetcd2d84",
+  "name": "evalsetcd2d84",
+  "eval_cases": [
+    {
+      "eval_id": "case621bc6",
+      "conversation": [
+        {
+          "invocation_id": "e-a2b79d05-25af-4513-9931-723d21212cb2",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Please approve a taxi expense of $75."
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "DECISION: DENIED\nCATEGORY: taxi\nAMOUNT: 75.00\nLIMIT: 40.00\nREASON: over_limit_by_35.00"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "EvalAgent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-b402f803-9eba-46b1-a10a-4700fda7c7e8",
+                        "args": {
+                          "category": "taxi",
+                          "amount": 75
+                        },
+                        "name": "check_policy"
+                      },
+                      "thought_signature": "CskBAY89a19bJYHkuPy-33Qudl-Eq8Y2k9VCpiIVbfb_xqPTe7A1Nxa38XAItB1bfYHdi6KGtW8QlwOuzLAmW1y8zzyQkTdy8-P141H-uXXu_xvDjQUJRQzNuAFuzGUk8An3EQWKeHrCoAb_wJVXlWKH0RpmcqkXlYC9B6oM3RzXFcuOtEcOPEGRbSj312ELtLkDnF_LreeNLsDWyWZlXhBR9w9ICElP8sCtKdt0cEDIpnZhTSrcwuR0co92GjINeQ1Oyx0JJGUG4M8Q"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "EvalAgent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-b402f803-9eba-46b1-a10a-4700fda7c7e8",
+                        "name": "check_policy",
+                        "response": {
+                          "category": "taxi",
+                          "amount": "75.00",
+                          "limit": "40.00",
+                          "decision": "DENIED",
+                          "reason": "over_limit_by_35.00"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1780245907.420067
+        }
+      ],
+      "session_input": {
+        "app_name": "eval_agent_01",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1780245935.580888
+    },
+    {
+      "eval_id": "case23c14f",
+      "conversation": [
+        {
+          "invocation_id": "e-d6cbe9d2-6f98-4fe1-9527-07604fa662bf",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Can I expense a $45 meal?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "DECISION: DENIED\nCATEGORY: meals\nAMOUNT: 45.00\nLIMIT: 75.00\nREASON: within_limit"
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "EvalAgent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-32a2b60f-ffdf-4093-94ab-001d3ffca104",
+                        "args": {
+                          "amount": 45,
+                          "category": "meals"
+                        },
+                        "name": "check_policy"
+                      },
+                      "thought_signature": "CpECAY89a19XuD5hEiqjeBHpafDnJilVQ9FhCzvxulRCkRMRCOCoaHD3EXrJn26NpFkn8R4WyvyqHzchzbn6868cm5OuPSKnUwgMekh-CEoSbP9e8NOPtBBGyziJXw98DBFBZxvJJFBRHdpGRzu-YpJnakzzKojQyea8lTgVFGI_YXs4-d6gE_VgZyupxgE5nUEW4KEzfgvPMA37stp4xvWYcwS17-oK8VfYEQq_lCIIeRx5wExxxHK07PN04kw-PRF40IrbxLprTc9mW7tJZE2bYn8HTGznN7nJNBdYZ-rHUR7ptTe1NCZ-vW9OUdWLHaoc0SkjQGZA6GFRqP_quL0yczRdPiE6wRQ1uvvQcSsXwKdP"
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "EvalAgent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-32a2b60f-ffdf-4093-94ab-001d3ffca104",
+                        "name": "check_policy",
+                        "response": {
+                          "category": "meals",
+                          "amount": "45.00",
+                          "limit": "75.00",
+                          "decision": "APPROVED",
+                          "reason": "within_limit"
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
+              }
+            ]
+          },
+          "creation_timestamp": 1780245857.4103856
+        }
+      ],
+      "session_input": {
+        "app_name": "eval_agent_01",
+        "user_id": "user"
+      },
+      "creation_timestamp": 1780245896.024958
+    }
+  ],
+  "creation_timestamp": 1780245827.6535933
+}
